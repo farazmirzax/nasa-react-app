@@ -198,3 +198,10 @@ footer button:hover {
     width: 100vw;
   }
 }
+
+iframe {
+  width: 100%;
+  height: 93vh; /* Full viewport height */
+  border: none; /* Remove border around the iframe */
+  object-fit: cover; /* Ensure the aspect ratio is maintained */
+}

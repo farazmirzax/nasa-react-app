@@ -22,11 +22,11 @@ function App() {
       if (localStorage.getItem(localKey)) {
         const apiData = JSON.parse(localStorage.getItem(localKey));
         setData(apiData);
-        console.log('Fetched from cache today');
+        console.log("Fetched from cache today");
         return;
       }
 
-      localStorage.clear()
+      localStorage.clear();
 
       try {
         const res = await fetch(url);
@@ -47,7 +47,15 @@ function App() {
         <Main data={data} />
       ) : (
         <div className="loadingState">
-          <i className="fa-solid fa-gear"></i>
+          <div class="pyramid-loader">
+            <div class="wrapper">
+              <span class="side side1"></span>
+              <span class="side side2"></span>
+              <span class="side side3"></span>
+              <span class="side side4"></span>
+              <span class="shadow"></span>
+            </div>
+          </div>
         </div>
       )}
 

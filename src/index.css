@@ -278,3 +278,52 @@ iframe {
   transform: rotateX(90deg) translateZ(-40px);
   filter: blur(12px);
 }
+
+.custom-datepicker {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-datepicker:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.bgVideo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.share-button-video {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.footer-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.liked {
+    color: red;
+}

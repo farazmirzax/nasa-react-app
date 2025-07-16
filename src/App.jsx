@@ -31,9 +31,15 @@ function App() {
 
       const cachedData = localStorage.getItem(localKey);
       if (cachedData) {
-        setData(JSON.parse(cachedData));
-        setLoading(false);
-        console.log(`Fetched from cache for ${formattedDate}`);
+        try {
+          setData(JSON.parse(cachedData));
+          console.log(`Fetched from cache for ${formattedDate}`);
+        } catch (e) {
+          console.error("Failed to parse cached data", e);
+          localStorage.removeItem(localKey); // Clear corrupted cache
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
@@ -56,32 +62,33 @@ function App() {
     fetchAPIdata();
   }, [date]);
 
-  if (loading) {
-    return (
-      <div className="loadingState">
-        <div className="pyramid-loader">
-          <div className="wrapper">
-            <span className="side side1"></span>
-            <span className="side side2"></span>
-            <span className="side side3"></span>
-            <span className="side side4"></span>
-            <span className="shadow"></span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="loadingState">Error: {error}</div>;
-  }
-
   return (
     <div className="app-container">
       <Calendar handleDateChange={handleDateChange} date={date} />
-      {data ? <Main data={data} /> : <div className="loadingState">No data available for this date.</div>}
-      {showModal && <SideBar data={data} handleToggleModal={handleToggleModal} />}
-      {data && <Footer data={data} handleToggleModal={handleToggleModal} />}
+
+      {loading && (
+        <div className="loadingState">
+          <div className="pyramid-loader">
+            <div className="wrapper">
+              <span className="side side1"></span>
+              <span className="side side2"></span>
+              <span className="side side3"></span>
+              <span className="side side4"></span>
+              <span className="shadow"></span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && <div className="loadingState">Error: {error}</div>}
+
+      {!loading && !error && (
+        <>
+          {data ? <Main data={data} /> : <div className="loadingState">No data available for this date.</div>}
+          {showModal && <SideBar data={data} handleToggleModal={handleToggleModal} />}
+          {data && <Footer data={data} handleToggleModal={handleToggleModal} />}
+        </>
+      )}
     </div>
   );
 }

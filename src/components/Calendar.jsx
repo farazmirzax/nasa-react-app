@@ -6,18 +6,29 @@ export default function Calendar(props) {
   const { date, handleDateChange } = props;
   const [showCalendar, setShowCalendar] = useState(false);
 
+  const toggleCalendar = () => {
+    setShowCalendar(!showCalendar);
+  }
+
+  const handleDateSelect = (newDate) => {
+    handleDateChange(newDate);
+    setShowCalendar(false); // Hide calendar after selecting a date
+  }
+
   return (
     <div className="calendar-container">
-      <button onClick={() => setShowCalendar(!showCalendar)} className="calendar-button">
+      <button onClick={toggleCalendar} className="calendar-button" aria-label="Open date picker">
         <i className="fa-solid fa-calendar-days"></i>
       </button>
       {showCalendar && (
-        <DatePicker
-          selected={date}
-          onChange={handleDateChange}
-          inline
-          maxDate={new Date()}
-        />
+        <div className="date-picker-wrapper">
+            <DatePicker
+              selected={date}
+              onChange={handleDateSelect}
+              inline
+              maxDate={new Date()}
+            />
+        </div>
       )}
     </div>
   );

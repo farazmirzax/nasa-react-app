@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import Main from "./components/Main";
 import SideBar from "./components/SideBar";
 import Calendar from "./components/Calendar";
+import SpaceLoader from "./components/SpaceLoader"; // Import the new loader
 
 function App() {
   const [data, setData] = useState(null);
@@ -10,6 +11,7 @@ function App() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [date, setDate] = useState(new Date());
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // New state for initial load
 
   function handleToggleModal() {
     setShowModal(!showModal);
@@ -36,9 +38,10 @@ function App() {
           console.log(`Fetched from cache for ${formattedDate}`);
         } catch (e) {
           console.error("Failed to parse cached data", e);
-          localStorage.removeItem(localKey); // Clear corrupted cache
+          localStorage.removeItem(localKey);
         } finally {
           setLoading(false);
+          if (isInitialLoad) setIsInitialLoad(false); // Set initial load to false
         }
         return;
       }
@@ -46,7 +49,9 @@ function App() {
       try {
         const res = await fetch(url);
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          // Try to parse error message from NASA API
+          const errorData = await res.json().catch(() => null);
+          throw new Error(errorData?.msg || `HTTP error! status: ${res.status}`);
         }
         const apiData = await res.json();
         localStorage.setItem(localKey, JSON.stringify(apiData));
@@ -57,16 +62,16 @@ function App() {
         console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
+        if (isInitialLoad) setIsInitialLoad(false); // Also set on API fetch
       }
     };
     fetchAPIdata();
-  }, [date]);
+  }, [date]); // isInitialLoad is not needed as a dependency here
 
-  return (
-    <div className="app-container">
-      <Calendar handleDateChange={handleDateChange} date={date} />
-
-      {loading && (
+  // Conditional Loader Rendering
+  const renderLoader = () => {
+    if (isInitialLoad) {
+      return (
         <div className="loadingState">
           <div className="pyramid-loader">
             <div className="wrapper">
@@ -78,11 +83,29 @@ function App() {
             </div>
           </div>
         </div>
-      )}
+      );
+    }
+    // For subsequent loads, show the space loader over the existing content
+    return (
+        <div className="loading-overlay">
+            <SpaceLoader />
+        </div>
+    );
+  };
 
-      {error && <div className="loadingState">Error: {error}</div>}
+  return (
+    <div className="app-container">
+      <Calendar handleDateChange={handleDateChange} date={date} />
 
-      {!loading && !error && (
+      {/* Show loader on top of content if it's not the initial load */}
+      {loading && !isInitialLoad && renderLoader()}
+      
+      {/* Handle initial load screen */}
+      {loading && isInitialLoad ? (
+        renderLoader()
+      ) : error ? (
+        <div className="loadingState">Error: {error}</div>
+      ) : (
         <>
           {data ? <Main data={data} /> : <div className="loadingState">No data available for this date.</div>}
           {showModal && <SideBar data={data} handleToggleModal={handleToggleModal} />}

@@ -1,74 +1,78 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Footer from "./components/Footer";
 import Main from "./components/Main";
 import SideBar from "./components/SideBar";
 import Calendar from "./components/Calendar";
-import SpaceLoader from "./components/SpaceLoader"; // Import the new loader
+import SpaceLoader from "./components/SpaceLoader";
 
 function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const [isInitialLoad, setIsInitialLoad] = useState(true); // New state for initial load
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  function handleToggleModal() {
-    setShowModal(!showModal);
-  }
-
+  const handleToggleModal = () => setShowModal(!showModal);
   const handleDateChange = (newDate) => {
-    setDate(newDate);
+    if (newDate.toDateString() !== currentDate.toDateString()) {
+      setCurrentDate(newDate);
+    }
   };
 
-  useEffect(() => {
-    const fetchAPIdata = async () => {
-      const NASA_KEY = import.meta.env.VITE_NASA_API_KEY;
-      const formattedDate = date.toISOString().split("T")[0];
-      const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&date=${formattedDate}`;
-      const localKey = `nasaData-${formattedDate}`;
+  const fetchAPIdata = useCallback(async (dateToFetch, isFallback = false) => {
+    setLoading(true);
+    setError(null);
 
-      setLoading(true);
-      setError(null);
+    const NASA_KEY = import.meta.env.VITE_NASA_API_KEY;
+    const formattedDate = dateToFetch.toISOString().split("T")[0];
+    const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&date=${formattedDate}`;
+    const localKey = `nasaData-${formattedDate}`;
 
-      const cachedData = localStorage.getItem(localKey);
-      if (cachedData) {
-        try {
-          setData(JSON.parse(cachedData));
-          console.log(`Fetched from cache for ${formattedDate}`);
-        } catch (e) {
-          console.error("Failed to parse cached data", e);
-          localStorage.removeItem(localKey);
-        } finally {
-          setLoading(false);
-          if (isInitialLoad) setIsInitialLoad(false); // Set initial load to false
-        }
-        return;
+    const cachedData = localStorage.getItem(localKey);
+    if (cachedData) {
+      setData(JSON.parse(cachedData));
+      setLoading(false);
+      setIsInitialLoad(false);
+      console.log(`Fetched from cache for ${formattedDate}`);
+      return;
+    }
+
+    try {
+      const res = await fetch(url);
+      const apiData = await res.json();
+      if (!res.ok) {
+        throw new Error(apiData.msg || `HTTP error! status: ${res.status}`);
       }
+      setData(apiData);
+      localStorage.setItem(localKey, JSON.stringify(apiData));
+    } catch (err) {
+      console.error(`Error fetching data for ${formattedDate}:`, err);
 
-      try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          // Try to parse error message from NASA API
-          const errorData = await res.json().catch(() => null);
-          throw new Error(errorData?.msg || `HTTP error! status: ${res.status}`);
-        }
-        const apiData = await res.json();
-        localStorage.setItem(localKey, JSON.stringify(apiData));
-        setData(apiData);
-        console.log(`Fetched from API for ${formattedDate}`);
-      } catch (err) {
+      // --- ROBUST FALLBACK LOGIC ---
+      // If this is the initial load and it's not already a fallback attempt...
+      if (isInitialLoad && !isFallback) {
+        console.warn("Initial fetch failed, attempting to fetch yesterday's data.");
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        setCurrentDate(yesterday); // This will trigger the effect again
+      } else {
+        // If it's not the initial load, or if the fallback also failed, show the error.
         setError(err.message);
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
-        if (isInitialLoad) setIsInitialLoad(false); // Also set on API fetch
       }
-    };
-    fetchAPIdata();
-  }, [date]); // isInitialLoad is not needed as a dependency here
+    } finally {
+      setLoading(false);
+      // Ensure initial load is set to false after the first attempt cycle.
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
+    }
+  }, [isInitialLoad]); // useCallback depends on isInitialLoad
 
-  // Conditional Loader Rendering
+  useEffect(() => {
+    fetchAPIdata(currentDate);
+  }, [currentDate, fetchAPIdata]);
+
   const renderLoader = () => {
     if (isInitialLoad) {
       return (
@@ -85,29 +89,29 @@ function App() {
         </div>
       );
     }
-    // For subsequent loads, show the space loader over the existing content
     return (
-        <div className="loading-overlay">
-            <SpaceLoader />
-        </div>
+      <div className="loading-overlay">
+        <SpaceLoader />
+      </div>
     );
   };
 
   return (
     <div className="app-container">
-      <Calendar handleDateChange={handleDateChange} date={date} />
+      <Calendar handleDateChange={handleDateChange} date={currentDate} />
 
-      {/* Show loader on top of content if it's not the initial load */}
       {loading && !isInitialLoad && renderLoader()}
-      
-      {/* Handle initial load screen */}
+
       {loading && isInitialLoad ? (
         renderLoader()
       ) : error ? (
-        <div className="loadingState">Error: {error}</div>
+        <div className="loadingState error-message">
+          <p>{error}</p>
+          <p className="error-subtext">Please select a different date.</p>
+        </div>
       ) : (
         <>
-          {data ? <Main data={data} /> : <div className="loadingState">No data available for this date.</div>}
+          {data ? <Main data={data} /> : <div className="loadingState">Waiting for data...</div>}
           {showModal && <SideBar data={data} handleToggleModal={handleToggleModal} />}
           {data && <Footer data={data} handleToggleModal={handleToggleModal} />}
         </>

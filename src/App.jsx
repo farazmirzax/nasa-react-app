@@ -4,6 +4,11 @@ import Main from "./components/Main";
 import SideBar from "./components/SideBar";
 import Calendar from "./components/Calendar";
 import SpaceLoader from "./components/SpaceLoader";
+import StarField from "./components/StarField";
+import ConstellationCursor from "./components/ConstellationCursor";
+import NebulaBackground from "./components/NebulaBackground";
+import ShootingStars from "./components/ShootingStars";
+import FloatingAsteroids from "./components/FloatingAsteroids";
 
 function App() {
   const [data, setData] = useState(null);
@@ -98,6 +103,11 @@ function App() {
 
   return (
     <div className="app-container">
+      <NebulaBackground />
+      <StarField />
+      <FloatingAsteroids />
+      <ConstellationCursor />
+      <ShootingStars />
       <Calendar handleDateChange={handleDateChange} date={currentDate} />
 
       {loading && !isInitialLoad && renderLoader()}

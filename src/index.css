@@ -407,3 +407,220 @@ footer h1 {
   }
 }
 /* --- End of Space Loader Styles --- */
+
+/* --- Start of Star Field Styles --- */
+.star-field {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: twinkle-drift 20s linear infinite;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes twinkle-drift {
+  0% {
+    opacity: 0.2;
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-25vh) scale(1.2);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateY(-50vh) scale(0.8);
+  }
+  75% {
+    opacity: 0.9;
+    transform: translateY(-75vh) scale(1.1);
+  }
+  100% {
+    opacity: 0.1;
+    transform: translateY(-100vh) scale(0.9);
+  }
+}
+/* --- End of Star Field Styles --- */
+
+/* --- Start of Nebula Background Styles --- */
+.nebula-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.nebula-cloud {
+  position: absolute;
+  border-radius: 50%;
+  animation: nebula-pulse 25s ease-in-out infinite;
+  filter: blur(50px);
+  opacity: 0.3;
+}
+
+@keyframes nebula-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.2;
+  }
+  25% {
+    transform: scale(1.2) rotate(90deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(0.8) rotate(180deg);
+    opacity: 0.1;
+  }
+  75% {
+    transform: scale(1.1) rotate(270deg);
+    opacity: 0.35;
+  }
+}
+/* --- End of Nebula Background Styles --- */
+
+/* --- Start of Shooting Stars Styles --- */
+.shooting-stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.shooting-star {
+  position: absolute;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  border-radius: 50%;
+  animation: shoot linear forwards;
+  box-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 16px rgba(135, 206, 235, 0.6),
+    0 0 24px rgba(135, 206, 235, 0.4);
+}
+
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+  transform: translate(-100%, -50%) rotate(var(--tail-angle, -45deg));
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes shoot {
+  0% {
+    opacity: 0;
+    transform: translateX(0) translateY(0) scale(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translateX(calc(var(--delta-x) * 0.9)) translateY(calc(var(--delta-y) * 0.9)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--delta-x)) translateY(var(--delta-y)) scale(0.5);
+  }
+}
+/* --- End of Shooting Stars Styles --- */
+
+/* --- Start of Floating Asteroids Styles --- */
+.floating-asteroids {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.asteroid {
+  position: absolute;
+  background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  border-radius: 30%;
+  animation: 
+    asteroid-drift var(--drift-duration, 50s) linear infinite,
+    asteroid-rotate var(--rotation-duration, 20s) linear infinite;
+  opacity: 0.6;
+  box-shadow: 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.5),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.1),
+    0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.asteroid::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  width: 20%;
+  height: 20%;
+  background: #1a1a1a;
+  border-radius: 50%;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.asteroid::after {
+  content: '';
+  position: absolute;
+  top: 60%;
+  left: 60%;
+  width: 15%;
+  height: 15%;
+  background: #1a1a1a;
+  border-radius: 50%;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes asteroid-drift {
+  0% {
+    transform: translateX(-20px) translateY(-20px);
+  }
+  25% {
+    transform: translateX(20px) translateY(-10px);
+  }
+  50% {
+    transform: translateX(10px) translateY(20px);
+  }
+  75% {
+    transform: translateX(-10px) translateY(10px);
+  }
+  100% {
+    transform: translateX(-20px) translateY(-20px);
+  }
+}
+
+@keyframes asteroid-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* --- End of Floating Asteroids Styles --- */

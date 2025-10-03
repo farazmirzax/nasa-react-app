@@ -15,7 +15,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Default to a date that definitely has data (September 29, 2024)
+  const [currentDate, setCurrentDate] = useState(new Date('2024-09-29'));
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const handleToggleModal = () => setShowModal(!showModal);

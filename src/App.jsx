@@ -15,8 +15,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  // Default to a date that definitely has data (September 29, 2024)
-  const [currentDate, setCurrentDate] = useState(new Date('2024-09-29'));
+  // Use new Date() but let the fallback logic handle future dates
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const handleToggleModal = () => setShowModal(!showModal);
@@ -58,10 +58,43 @@ function App() {
       // --- ROBUST FALLBACK LOGIC ---
       // If this is the initial load and it's not already a fallback attempt...
       if (isInitialLoad && !isFallback) {
-        console.warn("Initial fetch failed, attempting to fetch yesterday's data.");
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        setCurrentDate(yesterday); // This will trigger the effect again
+        console.warn("Initial fetch failed, attempting to fetch earlier data.");
+        // Try going back multiple days to find data that exists
+        let fallbackDate = new Date(dateToFetch);
+        fallbackDate.setDate(fallbackDate.getDate() - 1);
+        
+        // Keep going back until we reach a reasonable past date
+        const maxDaysBack = 7;
+        let daysBack = 1;
+        
+        const tryFallback = async () => {
+          while (daysBack <= maxDaysBack) {
+            try {
+              const fallbackFormatted = fallbackDate.toISOString().split("T")[0];
+              const fallbackUrl = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&date=${fallbackFormatted}`;
+              const fallbackRes = await fetch(fallbackUrl);
+              
+              if (fallbackRes.ok) {
+                console.log(`Found data for ${fallbackFormatted}`);
+                setCurrentDate(new Date(fallbackDate));
+                return;
+              }
+              
+              // Try the next day back
+              fallbackDate.setDate(fallbackDate.getDate() - 1);
+              daysBack++;
+            } catch (fallbackErr) {
+              console.error(`Fallback attempt ${daysBack} failed:`, fallbackErr);
+              fallbackDate.setDate(fallbackDate.getDate() - 1);
+              daysBack++;
+            }
+          }
+          
+          // If all fallbacks failed, show error
+          setError("Unable to find recent NASA data. Please select a different date.");
+        };
+        
+        tryFallback();
       } else {
         // If it's not the initial load, or if the fallback also failed, show the error.
         setError(err.message);

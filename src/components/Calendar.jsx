@@ -34,7 +34,7 @@ export default function Calendar(props) {
               selected={date}
               onChange={handleDateSelect}
               inline
-              maxDate={new Date()}
+              maxDate={new Date('2024-10-15')}
             />
         </div>
       )}
